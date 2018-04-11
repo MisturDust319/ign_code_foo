@@ -16,11 +16,11 @@ class App extends Component {
         }
     }
 
-  render() {
-    return (
-        <Road value={this.state.tiles}></Road>
-    );
-  }
+    render() {
+        return (
+            <Road value={this.state.tiles}></Road>
+        );
+    }
 
     toggleTile(i) {
         this.state.tiles[i] = !this.state.tiles[i];
