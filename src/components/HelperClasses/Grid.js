@@ -36,8 +36,6 @@
         // calculate the position in the 2d array
         let pos = x + (this.width * y);
 
-        alert("POS: " + pos);
-
         return pos;
     }
 

@@ -20,10 +20,10 @@ class RoadPanel extends React.Component {
 
     toggleTile = (event) => {
         var cursor = event.target.id.split(",");
-        alert(cursor);
+
         var i = cursor[0];
         var j = cursor[1];
-        alert(this.state.tiles.getValue(i, j));
+
         var curChar = this.state.tiles.getValue(i, j);
 
         if (curChar === "O") {
