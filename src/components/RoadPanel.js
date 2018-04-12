@@ -3,6 +3,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 import { Road } from './Road.js'
 
+import { Row } from 'reactstrap';
+import { Jumbotron } from 'reactstrap';
 import { Grid } from './HelperClasses/Grid.js';
 
 class RoadPanel extends React.Component {
@@ -34,12 +36,17 @@ class RoadPanel extends React.Component {
         this.setState({
             tiles: this.state.tiles
         });
-}
+    }
 
     render() {
         return (
             <div>
-                <Road value={this.state.tiles} onClick={this.toggleTile}></Road>
+                <Jumbotron>
+                    <h1>The Chicken Crossing the Road</h1>
+                </Jumbotron>
+                <Row>
+                    <Road value={this.state.tiles} onClick={this.toggleTile}></Road>
+                </Row>
             </div>
         );
     }

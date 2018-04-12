@@ -17,7 +17,7 @@ function Road(props) {
     }
     return (
         <Table>
-            <tbody>
+            <tbody class="text-center">
                 <tr>
                     {renderTile(0, 0)}
                     {renderTile(1, 0)}

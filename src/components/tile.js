@@ -1,12 +1,14 @@
 ﻿import React, { Component } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
+import { Button } from 'reactstrap';
+
 function Tile(props) {
     return (
         <td>
-            <button onClick={props.onClick} id={props.id} >
+            <Button onClick={props.onClick} id={props.id} >
                 {props.value}
-            </button>
+            </Button>
         </td>
     )
 }
