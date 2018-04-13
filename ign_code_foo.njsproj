@@ -31,6 +31,9 @@
     <Compile Include="src\components\HelperClasses\Grid.js">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="src\components\MoveHistory.js">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="src\components\RoadPanel.js">
       <SubType>Code</SubType>
     </Compile>
