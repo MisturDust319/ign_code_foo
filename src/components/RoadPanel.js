@@ -5,6 +5,7 @@ import { MoveHistory } from './MoveHistory.js';
 import { Road } from './Road.js';
 
 import { Row } from 'reactstrap';
+import { Col } from 'reactstrap';
 import { Button } from 'reactstrap';
 import { Jumbotron } from 'reactstrap';
 
@@ -18,34 +19,13 @@ class RoadPanel extends React.Component {
             tiles: new Grid(),
             moveHistory: Array(0),
             goodPaths: Array(0),
-            validMove: 0,
+            validMoveCount: 0,
         }
 
         // these ensure these functions will still have access
         // to this object's state when passed to child components
         this.toggleTile = this.toggleTile.bind(this);
-        this.storeMove = this.storeMove.bind(this);
-        this.popMove = this.popMove.bind(this);
-        this.peekMove = this.peekMove.bind(this);
         this.checkMove = this.checkMove.bind(this);
-    }
-
-    // stores the current position in the history
-    storeMove = (storeX, storeY) => {
-        this.state.moveHistory.push({
-            x: storeX,
-            y: storeY
-        })
-    }
-
-    // removes last move from history
-    popMove = () => {
-        return this.state.moveHistory.pop();
-    }
-
-    // peek at the last move
-    peekMove = () => {
-        return this.state.moveHistory[this.state.moveHistory.length - 1];
     }
 
     checkMove = (startX, startY) => {
@@ -53,8 +33,17 @@ class RoadPanel extends React.Component {
         this.state.moveHistory = [];
         this.state.goodPaths = [];
 
-        this.storeMove(startX, startY);
-        // store start position
+        // get limits of panel grid
+        var limits = {
+            x : {
+                upper : (this.state.tiles.width - 1),
+                lower : 0
+            },
+            y : {
+                upper : (this.state.tiles.height - 1),
+                lower : 0
+            }
+        }
 
         //check if start postion is pot hole,
         // if yes, return 0
@@ -66,6 +55,17 @@ class RoadPanel extends React.Component {
         // sum of valid moves
         var nextMove = [{ x: startX, y: startY }];
         // an array to store the next move
+        var hist = [{ x: startX, y: startY }];
+        // array to store history
+        // helper method to store and view history
+        var storeHist = (newX, newY) => {
+            hist.push({ x: newX, y: newY });
+        }
+        var peekHist = () => {
+            return hist[hist.length - 1];
+        }
+        var validPaths = [];
+        // stores valid paths
 
         // if len of move history is 0,
         // then you've exhausted all moves
@@ -82,27 +82,20 @@ class RoadPanel extends React.Component {
             var currentValue = this.state.tiles.getValue(i, j);
             if (currentValue === "X" || currentValue === -1) {
                 continue;
-                // backtracking: retrieve prev move
-                // let prevPos = this.popMove();
-                // //break if no previous position
-                // if (!prevPos) {
-                //     break;
-                // }
-                // nextMove.push({ x: prevPos.x, y: prevPos.y });
             }
             // if you have reached the right side, you've found a
             //  valid solution
-            else if (i === (this.state.tiles.width - 1)) {
+            else if (i === (limits.x.upper)) {
                 //increment valid move count
                 validMoves++;
 
                 // store this move in history
-                this.storeMove(i, j);
+                storeHist(i, j);
                 // store the current move list in goodPaths
-                this.state.goodPaths.push(this.state.moveHistory);
+                validPaths.push(hist);
 
                 // backtracking: retrieve prev move
-                let prevPos = this.popMove();
+                let prevPos = hist.pop();
                 //break if no previous position
                 if (!prevPos) {
                     break;
@@ -113,31 +106,36 @@ class RoadPanel extends React.Component {
                 // if yDiff = 0, it was right
                 // 1, down, -1 up
                 // make sure not to go backwards
-                let yDiff = j - this.peekMove().y;
+                let yDiff = j - peekHist().y;
                 
-                //alert("y: " + j + " last y : " + this.peekMove().y + " ydiff " + yDiff);
 
                 //store the current position in history
-                this.storeMove(i, j);
+                storeHist(i, j);
 
                 // goal is not to move backwards without
                 //  properly backtracking
                 // last move was down, don't go back up
                 // also don't go up if it's clearly not in bounds
-                if (yDiff !== 1 && (j > 0 )) {
+                if (yDiff !== 1 && (j > limits.y.lower )) {
                     nextMove.push({ x: i, y: (j - 1) });
                 }
                 // no special rules for moving right
                 nextMove.push({ x: i + 1, y: j });
                 // last move was up, don't go back down
                 // also don't try clearly out of bounds values
-                if (yDiff !== -1 && (j < this.state.tiles.height - 1)) {
+                if (yDiff !== -1 && (j < limits.y.upper)) {
                     nextMove.push({ x: i, y: (j + 1) });
                 }
             }
         }
 
-        return validMoves;
+        // properly store the various values
+
+        this.setState({
+            moveHistory: hist,
+            goodPaths: validPaths,
+            validMoveCount: validMoves,
+        });
     }
 
     // this toggles the tile from X to O and vice versa
@@ -168,18 +166,22 @@ class RoadPanel extends React.Component {
                     <h1>The Chicken Crossing the Road</h1>
                 </Jumbotron>
                 <Row>
-                    <Road value={this.state.tiles} onClick={this.toggleTile}></Road>
-                    <Button onClick={() => {
-                        // run check move
-                        var moves = this.checkMove(0, 0);
-                        // reset the state
-                        this.setState({
-                            moveHistory: this.state.moveHistory,
-                            goodPaths: this.state.goodPaths,
-                            validMoves: moves,
-                        });
-                        alert("Moves: " + moves);
-                    }}>Check Solutions</Button>
+                    <Col xs="6">
+                        <Road value={this.state.tiles} onClick={this.toggleTile}></Road>
+                    </Col>
+                    <Col xs="6">
+                        <Row>
+                            <Button onClick={() => {
+                                this.checkMove(0, 0);
+                            }}>Check Solutions</Button>
+                        </Row>
+                        <Row>
+                            Number of Valid Moves: {this.state.validMoveCount}
+                        </Row>
+                        <Row>
+                            <MoveHistory value={this.state.goodPaths}/>
+                        </Row>
+                    </Col>
                 </Row>
             </div>
                 );
