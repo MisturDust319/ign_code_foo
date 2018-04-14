@@ -7,7 +7,6 @@ import { Road } from './Road.js';
 import { Row } from 'reactstrap';
 import { Col } from 'reactstrap';
 import { Button } from 'reactstrap';
-import { Jumbotron } from 'reactstrap';
 
 import { Grid } from './HelperClasses/Grid.js';
 
@@ -15,8 +14,14 @@ class RoadPanel extends React.Component {
     constructor(props) {
         super(props);
 
+        let tileGrid = new Grid();
+        tileGrid.setValue(0, 1, "X");
+        tileGrid.setValue(1, 3, "X");
+        tileGrid.setValue(2, 2, "X");
+        tileGrid.setValue(3, 3, "X");
+
         this.state = {
-            tiles: new Grid(),
+            tiles: tileGrid,
             moveHistory: Array(0),
             goodPaths: Array(0),
             validMoveCount: 0,
@@ -45,6 +50,27 @@ class RoadPanel extends React.Component {
             }
         }
 
+        // holds the current direction of travel
+        var direction = ""; // initially not set
+        var getDirection = (j) => {
+            // find the direction of last move
+            // if yDiff = 0, it was right
+            // -1, down, 1 up
+            // make sure not to go backwards
+            
+            let yDiff = j - peekHist().y;
+            
+            if(yDiff == -1) {
+                return "down";
+            }
+            else if(yDiff == 0) {
+                return "right";
+            }
+            else if(yDiff == 1) {
+                return "up";
+            }
+        }
+
         //check if start postion is pot hole,
         // if yes, return 0
         if (this.state.tiles.getValue(startX, startY) == "X") {
@@ -55,14 +81,63 @@ class RoadPanel extends React.Component {
         // sum of valid moves
         var nextMove = [{ x: startX, y: startY }];
         // an array to store the next move
-        var hist = [{ x: startX, y: startY }];
+        //helper function to store move
+        var storeNextMove = (newX, newY) => {
+            nextMove.push({
+                x: newX,
+                y: newY
+            });
+        }
+
+        var hist = [];
         // array to store history
         // helper method to store and view history
         var storeHist = (newX, newY) => {
             hist.push({ x: newX, y: newY });
         }
         var peekHist = () => {
-            return hist[hist.length - 1];
+            if (hist.length) {
+                return hist[hist.length - 1];
+            }
+            else {
+                return { x: startX, y : startY }; // if nothing is in hist,
+                // just return the start y val
+            }
+        }
+
+        // move map is an object used to help make sure we aren't going
+        // back to the same places over and over
+        var moveMap = {};
+        // addToMoveMap(x, y) is used to quickly add something to move map
+        var addToMoveMap = (x, y) => {
+            let coordinate = "(" + x + ", " + y + ")";
+
+            if(!(coordinate in moveMap)) {
+                moveMap[coordinate] = {
+                    startDir : {
+                        "up" : {
+                            canMoveUp : true,
+                            canMoveRight : true,
+                            canMoveDown : false,
+                        },
+                        "right" : {
+                            canMoveUp : true,
+                            canMoveRight : true,
+                            canMoveDown : true,
+                        },
+                        "down" : {
+                            canMoveUp : false,
+                            canMoveRight : true,
+                            canMoveDown : true,
+                        }
+                    }
+                }
+            }
+        }
+        var checkMoveMap = (x, y, dir) => {
+            let coordinate = "(" + x + ", " + y + ")";
+
+            return moveMap[coordinate].startDir[dir];
         }
         var validPaths = [];
         // stores valid paths
@@ -81,7 +156,8 @@ class RoadPanel extends React.Component {
             // or out of bounds, backtrack
             var currentValue = this.state.tiles.getValue(i, j);
             if (currentValue === "X" || currentValue === -1) {
-                continue;
+                let mov = hist.pop();
+                storeNextMove(mov.x, mov.y);
             }
             // if you have reached the right side, you've found a
             //  valid solution
@@ -91,40 +167,130 @@ class RoadPanel extends React.Component {
 
                 // store this move in history
                 storeHist(i, j);
-                // store the current move list in goodPaths
-                validPaths.push(hist);
+                // store a copy of the move list in goodPaths
+                validPaths.push(hist.slice(0));
 
                 // backtracking: retrieve prev move
+                // reset next move
+                nextMove = [];
+
+                // get previous coordinate
+                // do it twice to get out of the goal zone
+                let prevPrevPos = hist.pop();
                 let prevPos = hist.pop();
-                //break if no previous position
-                if (!prevPos) {
-                    break;
+
+                // get the direction of the previous step
+                direction = getDirection(prevPos.y);
+
+                let canMoveUp = checkMoveMap(prevPos.x, prevPos.y, direction).canMoveUp;
+                let canMoveRight = checkMoveMap(prevPos.x, prevPos.y, direction).canMoveRight;
+                let canMoveDown = checkMoveMap(prevPos.x, prevPos.y, direction).canMoveDown;
+
+                // keep popping until you backtrack to a coordinate that
+                // hasn't had all next routes exhausted
+                while(!(
+                    canMoveUp
+                    || canMoveRight
+                    || canMoveDown
+                ) && hist.length > 0) {
+                    // keep track of two prev moves
+                    prevPrevPos = prevPos;
+                    prevPos = hist.pop();
+
+                    direction = getDirection(prevPos.y);
+    
+                    canMoveUp = checkMoveMap(prevPos.x, prevPos.y, direction).canMoveUp;
+                    canMoveRight = checkMoveMap(prevPos.x, prevPos.y, direction).canMoveRight;
+                    canMoveDown = checkMoveMap(prevPos.x, prevPos.y, direction).canMoveDown;
                 }
-            }
-            else {
-                // find the direction of last move
-                // if yDiff = 0, it was right
-                // 1, down, -1 up
-                // make sure not to go backwards
-                let yDiff = j - peekHist().y;
                 
+                // put prev move back in move queue
+                storeNextMove(prevPos.x, prevPos.y);
+            }
+            // if on a normal tile, plan next move
+            else if (currentValue === "O") {
+                // find the dirrection we traveled getting here
+                direction = getDirection(j);
 
                 //store the current position in history
                 storeHist(i, j);
+                // store position in move map
+                addToMoveMap(i, j);
 
-                // goal is not to move backwards without
-                //  properly backtracking
-                // last move was down, don't go back up
-                // also don't go up if it's clearly not in bounds
-                if (yDiff !== 1 && (j > limits.y.lower )) {
-                    nextMove.push({ x: i, y: (j - 1) });
+                // cue up next moves
+                //for convenience, get the current rules of progression
+                var movMap = checkMoveMap(i, j, direction);
+                
+                // if you just went up, then you can't go back down,
+                // only right or up more
+                if(direction == "up") {
+                    // only move up if it won't exceed bounds
+                    // AND if you can go that way
+                    if(((j+1) <= limits.y.upper)
+                    && (movMap.canMoveUp)) {
+                        // turn off canMoveUp for this spot & direction
+                        movMap.canMoveUp = false;
+                        storeNextMove(i, j+1);
+                    } 
+                    // you can only go right if that is allowed for this space
+                    else if(movMap.canMoveRight) {
+                        // turn off canMoveRight for this spot & direction
+                        movMap.canMoveRight = false;
+                        storeNextMove(i+1, j);
+                    }
                 }
-                // no special rules for moving right
-                nextMove.push({ x: i + 1, y: j });
-                // last move was up, don't go back down
-                // also don't try clearly out of bounds values
-                if (yDiff !== -1 && (j < limits.y.upper)) {
-                    nextMove.push({ x: i, y: (j + 1) });
+                // if you just went down, you can't go up,
+                // only down more or right
+                else if(direction == "down") {
+                    // only move down if it won't exceed bounds
+                    // AND if you can go that way
+                    if(((j-1) >= limits.y.lower)
+                    && (movMap.canMoveDown)) {
+                        // turn off canMoveUp for this spot & direction
+                        movMap.canMoveDown = false;
+                        storeNextMove(i, j-1);
+                    } 
+                    // you can only go right if that is allowed for this space
+                    else if(movMap.canMoveRight) {
+                        // turn off canMoveRight for this spot & direction
+                        movMap.canMoveRight = false;
+                        storeNextMove(i+1, j);
+                    }
+                }
+                // if you moved right, you can move up, down, or right 
+                else if(direction == "right") {
+                    // only move up if it won't exceed bounds
+                    // AND if you can go that way
+                    if(((j+1) <= limits.y.upper)
+                    && (movMap.canMoveUp)) {
+                        // turn off canMoveUp for this spot & direction
+                        movMap.canMoveUp = false;
+                        storeNextMove(i, j+1);
+                    } 
+                    // only move down if it won't exceed bounds
+                    // AND if you can go that way
+                    else if(((j-1) >= limits.y.lower)
+                    && (movMap.canMoveDown)) {
+                        // turn off canMoveUp for this spot & direction
+                        movMap.canMoveDown = false;
+                        storeNextMove(i, j-1);
+                    } 
+                    // you can only go right if that is allowed for this space
+                    else if(movMap.canMoveRight) {
+                        // turn off canMoveRight for this spot & direction
+                        movMap.canMoveRight = false;
+                        storeNextMove(i+1, j);
+                    }
+                }
+                // if no new moves were found, try backtracking
+                if(nextMove.length == 0) {
+                    // this only works if there's enough data in the history
+                    if(hist.length > 1) {
+                        // pop twice, otherwise it gets stuck in loop
+                        hist.pop();
+                        let mov = hist.pop();
+                        storeNextMove(mov.x, mov.y);
+                    }
                 }
             }
         }
@@ -162,9 +328,6 @@ class RoadPanel extends React.Component {
     render() {
         return (
             <div>
-                <Jumbotron>
-                    <h1>The Chicken Crossing the Road</h1>
-                </Jumbotron>
                 <Row>
                     <Col xs="6">
                         <Road value={this.state.tiles} onClick={this.toggleTile}></Road>
@@ -172,7 +335,7 @@ class RoadPanel extends React.Component {
                     <Col xs="6">
                         <Row>
                             <Button onClick={() => {
-                                this.checkMove(0, 0);
+                                this.checkMove(0, 3);
                             }}>Check Solutions</Button>
                         </Row>
                         <Row>

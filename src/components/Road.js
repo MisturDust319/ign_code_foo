@@ -19,16 +19,10 @@ function Road(props) {
         <Table>
             <tbody class="text-center">
                 <tr>
-                    {renderTile(0, 0)}
-                    {renderTile(1, 0)}
-                    {renderTile(2, 0)}
-                    {renderTile(3, 0)}
-                </tr>
-                <tr>
-                    {renderTile(0, 1)}
-                    {renderTile(1, 1)}
-                    {renderTile(2, 1)}
-                    {renderTile(3, 1)}
+                    {renderTile(0, 3)}
+                    {renderTile(1, 3)}
+                    {renderTile(2, 3)}
+                    {renderTile(3, 3)}
                 </tr>
                 <tr>
                     {renderTile(0, 2)}
@@ -37,10 +31,16 @@ function Road(props) {
                     {renderTile(3, 2)}
                 </tr>
                 <tr>
-                    {renderTile(0, 3)}
-                    {renderTile(1, 3)}
-                    {renderTile(2, 3)}
-                    {renderTile(3, 3)}
+                    {renderTile(0, 1)}
+                    {renderTile(1, 1)}
+                    {renderTile(2, 1)}
+                    {renderTile(3, 1)}
+                </tr>
+                <tr>
+                    {renderTile(0, 0)}
+                    {renderTile(1, 0)}
+                    {renderTile(2, 0)}
+                    {renderTile(3, 0)}
                 </tr>
             </tbody>
         </Table>
