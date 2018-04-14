@@ -6,9 +6,11 @@ import { Road } from './Road.js';
 
 import { Row } from 'reactstrap';
 import { Col } from 'reactstrap';
+import { Input } from 'reactstrap';
 import { Button } from 'reactstrap';
 
 import { Grid } from './HelperClasses/Grid.js';
+import { Label } from 'reactstrap/dist/reactstrap.es';
 
 class RoadPanel extends React.Component {
     constructor(props) {
@@ -25,12 +27,24 @@ class RoadPanel extends React.Component {
             moveHistory: Array(0),
             goodPaths: Array(0),
             validMoveCount: 0,
+            startingY: 3
         }
 
         // these ensure these functions will still have access
         // to this object's state when passed to child components
         this.toggleTile = this.toggleTile.bind(this);
         this.checkMove = this.checkMove.bind(this);
+        this.changeStartingY = this.changeStartingY.bind(this);
+    }
+
+    changeStartingY = (event) => {
+        let newY = parseInt(event.target.value);
+        if (newY < 0 || newY > 3) {
+            newY = 3;
+        }
+        this.setState({
+            startingY: newY
+        });
     }
 
     checkMove = (startX, startY) => {
@@ -334,12 +348,23 @@ class RoadPanel extends React.Component {
                     </Col>
                     <Col xs="6">
                         <Row>
-                            <Button onClick={() => {
-                                this.checkMove(0, 3);
-                            }}>Check Solutions</Button>
+                            <Col xs="3">
+                                <Label>Starting Y Position: </Label>
+                            </Col>
+                            <Col xs="3">
+                                <Input type="text" onChange={this.changeStartingY} />
+                            </Col>
+                            <Col xs="6">
+                                <Button onClick={() => {
+                                    this.checkMove(0, this.state.startingY);
+                                    alert("Number of moves starting at Y: " + this.state.startingY);
+                                }}>Check Solutions</Button>
+                            </Col>
                         </Row>
                         <Row>
-                            Number of Valid Moves: {this.state.validMoveCount}
+                            <Col xs="12">
+                                Number of Valid Moves: {this.state.validMoveCount}
+                            </Col>
                         </Row>
                         <Row>
                             <MoveHistory value={this.state.goodPaths}/>
