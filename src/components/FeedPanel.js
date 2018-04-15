@@ -17,8 +17,8 @@ class FeedPanel extends React.Component {
                 <Row>
                     <Col xs="12">
                         <ButtonGroup >
-                            <Button size="lg">VIDEOS</Button>
-                            <Button size="lg">ARTICLES</Button>
+                            <Button color="primary">VIDEOS</Button>
+                            <Button color="primary">ARTICLES</Button>
                         </ButtonGroup>
                     </Col>
                 </Row>
@@ -31,7 +31,7 @@ class FeedPanel extends React.Component {
                 </Row>
                 <Row>
                     <Col xs="12">
-                        <Button size="lg" color="danger">LOAD MORE</Button>
+                        <Button color="primary">LOAD MORE</Button>
                     </Col>
                 </Row>
             </div>

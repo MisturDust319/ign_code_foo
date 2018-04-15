@@ -14,7 +14,33 @@ html * {
     font-weight: bold;
 }
 
+/* Bootstrap overrides */
+
+/* wipe the btn-primary clean for further override */
 .btn {
+    color: white;
+    background-color: #bf1313;
+    border-color: #bf1313; 
+}
+.btn:hover, .btn:focus, .btn:active, .btn.active, .open>.dropdown-toggle.btn {
+    color: #bf1313;
+    background-color: white;
+    border-color: #bf1313; 
+}
+
+.btn-primary {
+    color: white;
+    background-color: #bf1313;
+    border-color: #bf1313; 
+}
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary.active, .open>.dropdown-toggle.btn-primary, .btn-primary:not(:disabled):not(.disabled):active, .btn-primary:not(:disabled):not(.disabled):active:focus {
+    color: #bf1313;
+    background-color:white;
+    border-color: #bf1313;
+    box-shadow: none; 
+}
+
+.btn, .btn-primary {
     background: #bf1313;
 
     font-family: 'ars-maquette-web',sans-serif;
@@ -24,8 +50,20 @@ html * {
 
     width: 100%;
 }
-.btn.btn-success {
+.btn:active, {
     background: white;
+    color: #bf1313;
+}
+.btn-primary:active {
+    background: white;
+    color: #bf1313;
+}
+
+.btn:hover {
+    text-decoration: underline;
+}
+.btn-primary:hover {
+    text-decoration: underline;
 }
 
 .btn-group {
