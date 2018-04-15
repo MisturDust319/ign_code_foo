@@ -1,0 +1,33 @@
+html * {
+    font-family: 'ff-din-round-web-pro',sans-serif;
+}
+
+.item-stats {
+    font-family: 'ars-maquette-web',sans-serif;
+    font-size: 14px;
+    font-weight: bold;
+    color: #bf1313;
+}
+
+.article-name:hover {
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+.btn {
+    background: #bf1313;
+
+    font-family: 'ars-maquette-web',sans-serif;
+    font-weight: bold;
+    font-size: 1em;
+    color: white;
+
+    width: 100%;
+}
+.btn.btn-success {
+    background: white;
+}
+
+.btn-group {
+    width: 100%;
+}
