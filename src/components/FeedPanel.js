@@ -22,11 +22,10 @@ class FeedPanel extends React.Component {
                         </ButtonGroup>
                     </Col>
                 </Row>
-                <Row>
+                <Row className="item-list">
                     <Col xs="12">
                         <Article imageSource="https://assets1.ignimgs.com/2018/03/28/agentsofshieldyoyo-1280-1522278265966_compact.jpg"
                         length="12" commentCount="5" name="qqqqqqq" />
-                        <hr />
                     </Col>
                 </Row>
                 <Row>

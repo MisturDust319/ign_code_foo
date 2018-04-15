@@ -2,6 +2,12 @@ html * {
     font-family: 'ff-din-round-web-pro',sans-serif;
 }
 
+/* Custom Properties */
+
+.item-list {
+    padding: 20px 0;
+}
+
 .item-stats {
     font-family: 'ars-maquette-web',sans-serif;
     font-size: 14px;
@@ -9,10 +15,13 @@ html * {
     color: #bf1313;
 }
 
+
 .article-name:hover {
     text-decoration: underline;
     font-weight: bold;
 }
+
+
 
 /* Bootstrap overrides */
 
@@ -49,6 +58,12 @@ html * {
     color: white;
 
     width: 100%;
+
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    border-radius: 10px; /* future proofing */
+    -khtml-border-radius: 10px; /* for old Konqueror browsers */
+
 }
 .btn:active, {
     background: white;
@@ -68,4 +83,6 @@ html * {
 
 .btn-group {
     width: 100%;
+    
+
 }
