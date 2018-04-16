@@ -9,6 +9,9 @@ html * {
     width: 100%;
 }
 
+hr {
+    border-top: 2px solid black;
+}
 
 .article-picture {
     padding-left: 0;

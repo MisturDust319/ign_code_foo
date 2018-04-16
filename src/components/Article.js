@@ -10,13 +10,13 @@ function Article(props) {
 
     let getRule = (bool) => {
         if(bool) {
-            return ( <hr />);
+            return ( <hr xs="12"/>);
         }
     }
 
     return (
         <Row className="article-card">
-            <hr xs="12"/>
+            {getRule(props.rule)}
             <Col xs="12" lg="4" className="article-picture">
                 <img src={props.imageSource} width={props.imageWidth} height={props.imageHeight} />
             </Col>
