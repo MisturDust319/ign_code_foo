@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import axios from 'axios';
+import { axios } from 'axios';
+import fetchJsonp from 'fetch-jsonp';
 
 import { Row } from 'reactstrap';
 import { Col } from 'reactstrap';
@@ -50,49 +51,62 @@ class FeedPanel extends React.Component {
         let content; // empty var to hold content
         let articles = [];
 
-        // you want to get content in regular chunks
-        // so loop until you get enough
-        // while(articles.length < 10) {
-            // call API to get feed content
-            axios.get(url)
-                .then((response) => {
-                    alert(response.data);
-                    content = response.data.map((cont) => {
-                        // for each datum processed, increment start index
-                        this.startIndex = (this.startIndex + 1) % 300;
-                        
-                        let dat = {} // holds return data
+        // filters out irrelevant data
+        let filterArticles = (data, storage) => {
+            // next sort content into videos and articles
+            let art = data.filter((datum) => {
+                return datum.type === "article";
+            });
 
-                        // get img data
-                        let imgDat = cont.thumbnails[0];
-                        dat.imgURL = imgDat.url;
-                        dat.imgWidth = imgDat.width;
-                        dat.imgHeight = imgDat.height;
+            // store the found data in articles
+            art.forEach((article) => {
+                storage.push(article);
+            });
 
-                        // other data
-                        dat.id = cont.contentId;
-                        dat.title = cont.metadata.title;
-                        dat.type = cont.metadata.contentType;
+            this.setState({
+                articles: storage
+            })
+        }
 
-                        return dat;
-                    });
-                }).catch((error) => {
-                    console.log(error.response);
-                });
+        // parses data into a usable form
+        let parseData = (data, storage) => {
+            console.log(data);
+            
+            let parsedData = data.map((cont) => {
+                // for each datum processed, increment start index
+                this.startIndex = (this.startIndex + 1) % 300;
+                
+                let dat = {} // holds return data
 
-            // // next sort content into videos and articles
-            // articles = content.filter((data) => {
-            //     return data.type === "article";
-            // });
+                // get img data
+                let imgDat = cont.thumbnails[0];
+                dat.imgURL = imgDat.url;
+                dat.imgWidth = imgDat.width;
+                dat.imgHeight = imgDat.height;
 
-            // // make sure you only get 10 items
-            // if(articles.length > this.contentAmount) {
-            //     articles.slice( 0, this.contentAmount + 1);
-            // }
-        // }
+                // other data
+                dat.id = cont.contentId;
+                dat.title = cont.metadata.title;
+                dat.type = cont.metadata.contentType;
 
-        // store the data in state
-        this.setState({ articles : articles});
+                return dat;
+            });
+
+            filterArticles.call(this, parsedData, storage);
+        }
+
+        // Connects to API w/ JSONP
+        let getData = (url, storage) => {
+            fetchJsonp(url)
+            .then((res) => {
+                return res.json();
+            }).then((json) => {
+                parseData.call(this, json.data, articles);
+            });
+        }
+
+        // get data from API
+        getData.call(this, url, articles);
     }
 
     renderArticles = () => {
