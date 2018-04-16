@@ -131,6 +131,15 @@ class FeedPanel extends React.Component {
                 dat.title = cont.metadata.title;
                 dat.type = cont.metadata.contentType;
 
+                //duration has to be calculated, if available
+                let duration = cont.metadata.duration;
+                if(duration > 60) {
+                    duration = String(duration/60) + "h";
+                } else {
+                    duration = String(duration) + "m";
+                }
+                dat.length = Math.floor(Math.random() * Math.floor(15)) + "m";
+
                 return dat;
             });
 
@@ -169,7 +178,7 @@ class FeedPanel extends React.Component {
                 return (
                     <Article key={art.id}
                     imageSource={art.imgURL} imageWidth={art.imageWidth} imageHeight={art.imageHeight}
-                    length="TEST" commentCount={art.commentCount}
+                    length={art.length}commentCount={art.commentCount}
                     name={art.title} rule={showRule} />
                 )
             });
