@@ -4,6 +4,19 @@ html * {
 
 /* Custom Properties */
 
+.article-card {
+    margin: 10px 0;
+    width: 100%;
+}
+
+.article-picture:hover {
+    opacity: .75;
+}
+
+.article-info {
+    padding: 10px 20px;
+}
+
 .item-list {
     padding: 20px 0;
 }
@@ -13,6 +26,7 @@ html * {
     font-size: 14px;
     font-weight: bold;
     color: #bf1313;
+
 }
 
 .button-margin {

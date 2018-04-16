@@ -37,6 +37,11 @@ class FeedPanel extends React.Component {
         this.getContent = this.getContent.bind(this);
     }
 
+    // after mounting, load something to the feed
+    componentDidMount() {
+        this.getContent();
+    }
+
     getContent = () => {
         (this.state.view === "videos") ? this.getVideos() : this.getArticles();
     }
@@ -51,25 +56,62 @@ class FeedPanel extends React.Component {
         let content; // empty var to hold content
         let articles = [];
 
+        // gets extra stats for 
+        let getComments = (url, content) => {
+            fetchJsonp(url).then((res)=>{
+                console.log("Comments");
+                console.log(res.json());
+                return res.json();
+            })
+            .then((json)=>{
+                // convert the json to a big object
+                var idDict = {};
+                json.content.forEach((id)=>{
+                    idDict[id.id] = id.count;
+                });
+
+                content.forEach((item)=> {
+                    let count = idDict[item.id];
+                    item.commentCount = count;
+                });
+
+                this.setState({
+                    articles: content
+                });
+            }).catch((err)=>{
+                console.log(err.message);
+            })
+        }
+
         // filters out irrelevant data
-        let filterArticles = (data, storage) => {
+        let filterArticles = (data) => {
             // next sort content into videos and articles
             let art = data.filter((datum) => {
                 return datum.type === "article";
             });
 
-            // store the found data in articles
-            art.forEach((article) => {
-                storage.push(article);
-            });
+            // // hodl the articles for processsing
+            // let art = [];
 
-            this.setState({
-                articles: storage
-            })
+            // // store the found data in articles
+            // art.forEach((article) => {
+            //     this.art.push(article);
+            // });
+
+            let commentIds = art.map((cur) => { return cur.id }).join(",");
+
+            url = `${this.apiURL}comments?ids=${commentIds}`;
+
+            // get teh comments
+            getComments.call(this, url, art);
+
+            // this.setState({
+            //     articles: art
+            // })
         }
 
         // parses data into a usable form
-        let parseData = (data, storage) => {
+        let parseData = (data) => {
             console.log(data);
             
             let parsedData = data.map((cont) => {
@@ -92,37 +134,48 @@ class FeedPanel extends React.Component {
                 return dat;
             });
 
-            filterArticles.call(this, parsedData, storage);
+            filterArticles.call(this, parsedData);
         }
 
         // Connects to API w/ JSONP
-        let getData = (url, storage) => {
+        let getData = (url) => {
             fetchJsonp(url)
             .then((res) => {
                 return res.json();
             }).then((json) => {
-                parseData.call(this, json.data, articles);
+                parseData.call(this, json.data);
             });
         }
 
         // get data from API
-        getData.call(this, url, articles);
+        getData.call(this, url);
     }
 
+    // helps make sure the articles are rendered properly
     renderArticles = () => {
         let zeroElem = this.state.articles[0];
-        let ret = (
-            <Article key={zeroElem.id}
-            imageSource={zeroElem.imgURL} imageWidth={zeroElem.imageWidth} imageHeight={zeroElem.imageHeight}
-            length="TEST" commentCount="TEST"
-            name={zeroElem.title} />
-        );
-        ret += this.state.articles.slice(0, this.state.articles.length).map((art) => {
-            <Article key={art.id}
-            imageSource={art.imgURL} imageWidth={art.imageWidth} imageHeight={art.imageHeight}
-            length="TEST" commentCount="TEST"
-            name={art.title} rule={true} />
-        });
+        // only run if there are articles to show
+        if(zeroElem) {
+            // let ret = (
+            //     <Article key={zeroElem.id}
+            //     imageSource={zeroElem.imgURL} imageWidth={zeroElem.imageWidth} imageHeight={zeroElem.imageHeight}
+            //     length="TEST" commentCount="TEST"
+            //     name={zeroElem.title} />
+            // );
+            let ret = this.state.articles.slice(0, this.state.articles.length).map((art, index) => {
+                let showRule = false;
+                if (index > 0) {showRule = true};
+
+                return (
+                    <Article key={art.id}
+                    imageSource={art.imgURL} imageWidth={art.imageWidth} imageHeight={art.imageHeight}
+                    length="TEST" commentCount={art.commentCount}
+                    name={art.title} rule={showRule} />
+                )
+            });
+
+            return ret;
+        }
     }
 
     render() {
@@ -137,7 +190,7 @@ class FeedPanel extends React.Component {
                     </Col>
                 </Row>
                 <Row className="item-list">
-                    {this.renderArticles}
+                    {this.renderArticles()}
                 </Row>
                 <Row>
                     <Col xs="12">
